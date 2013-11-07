@@ -5,7 +5,7 @@ DOWNLOAD_DIR=$(mktemp -d)
 BUILD_DIR=$(mktemp -d)
 BUILD_TIME=$(date +%s)
 
-trap "rm -rf $BUILD_DIR $DOWNLOAD_DIR" EXIT SIGINT SIGTERM
+trap "rm -rf $BUILD_DIR $DOWNLOAD_DIR && sudo yum remove -y python2.7" EXIT SIGINT SIGTERM
 
 # Download and build Python 2.7.5
 cd "$DOWNLOAD_DIR"
@@ -41,3 +41,51 @@ fpm -s dir -t rpm -n python2.7-devel -v 2.7.5-$BUILD_TIME -C "$BUILD_DIR" \
     -d bash \
     -d python2.7 \
     usr/local/include
+
+cd /vagrant
+if [[ ! -f /usr/local/bin/python2.7 ]]; then
+    sudo yum install -y python2.7-2.7.5*.rpm python2.7-devel-*.rpm
+fi
+
+function download_python_package  {
+    cd "$BUILD_DIR"
+    PACKAGE_ARR=(${1/-/ })
+
+    curl -O https://pypi.python.org/packages/source/"${1:0:1}"/"${PACKAGE_ARR[0]}"/"$1".tar.gz
+    tar zxf "$1".tar.gz
+}
+
+# Setuptools
+PACKAGE=setuptools-1.3.1
+download_python_package $PACKAGE
+cd /vagrant
+fpm -s python -t rpm \
+    --python-bin python2.7 --python-package-name-prefix python2.7 \
+    -d python2.7 \
+    -d python2.7-devel \
+    "$BUILD_DIR/$PACKAGE"/setup.py
+sudo yum install -y python2.7-setuptools*.rpm
+
+# Pip
+PACKAGE=pip-1.4.1
+download_python_package $PACKAGE
+cd /vagrant
+fpm -s python -t rpm \
+    --python-bin python2.7 --python-package-name-prefix python2.7 \
+    -d python2.7 \
+    -d python2.7-devel \
+    -d python2.7-setuptools \
+    "$BUILD_DIR/$PACKAGE"/setup.py
+sudo yum install -y python2.7-pip*.rpm
+
+# Virtualenv
+PACKAGE=virtualenv-1.10.1
+download_python_package $PACKAGE
+cd /vagrant
+fpm -s python -t rpm \
+    --python-bin python2.7 --python-package-name-prefix python2.7 \
+    -d python2.7 \
+    -d python2.7-devel \
+    -d python2.7-setuptools \
+    "$BUILD_DIR/$PACKAGE"/setup.py
+sudo yum install -y python2.7-virtualenv*.rpm
