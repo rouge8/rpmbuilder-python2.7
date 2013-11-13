@@ -3,7 +3,7 @@ set -e
 
 DOWNLOAD_DIR=$(mktemp -d)
 BUILD_DIR=$(mktemp -d)
-BUILD_TIME=$(date +%s)
+RPM_RELEASE=1
 
 trap "rm -rf $BUILD_DIR $DOWNLOAD_DIR && sudo yum remove -y python2.7" EXIT SIGINT SIGTERM
 
@@ -18,8 +18,8 @@ make altinstall DESTDIR="$BUILD_DIR"
 
 cd /vagrant
 # Build python2.7 RPM
-fpm -s dir -t rpm -n python2.7 -v 2.7.5-$BUILD_TIME -C "$BUILD_DIR" \
-    -p python2.7-VERSION_ARCH.rpm \
+fpm -s dir -t rpm -n python2.7 -v 2.7.5 --iteration $RPM_RELEASE -C "$BUILD_DIR" \
+    -p python2.7-FULLVERSION.ARCH.rpm \
     -d bash \
     -d bzip2-libs \
     -d coreutils \
@@ -36,8 +36,8 @@ fpm -s dir -t rpm -n python2.7 -v 2.7.5-$BUILD_TIME -C "$BUILD_DIR" \
     usr/local/bin usr/local/lib usr/local/share
 
 # Build python2.7-devel RPM
-fpm -s dir -t rpm -n python2.7-devel -v 2.7.5-$BUILD_TIME -C "$BUILD_DIR" \
-    -p python2.7-devel-VERSION_ARCH.rpm \
+fpm -s dir -t rpm -n python2.7-devel -v 2.7.5 --iteration $RPM_RELEASE -C "$BUILD_DIR" \
+    -p python2.7-devel-FULLVERSION.ARCH.rpm \
     -d bash \
     -d python2.7 \
     usr/local/include
