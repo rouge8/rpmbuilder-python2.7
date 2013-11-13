@@ -7,18 +7,18 @@ RPM_RELEASE=1
 
 trap "rm -rf $BUILD_DIR $DOWNLOAD_DIR && sudo yum remove -y python2.7" EXIT SIGINT SIGTERM
 
-# Download and build Python 2.7.5
+# Download and build Python 2.7.6
 cd "$DOWNLOAD_DIR"
-curl -O http://python.org/ftp/python/2.7.5/Python-2.7.5.tar.bz2
-tar jxvf Python-2.7.5.tar.bz2
-cd Python-2.7.5
+curl -O http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
+tar zxvf Python-2.7.6.tgz
+cd Python-2.7.6
 ./configure --enable-unicode=ucs4
 make
 make altinstall DESTDIR="$BUILD_DIR"
 
 cd /vagrant
 # Build python2.7 RPM
-fpm -s dir -t rpm -n python2.7 -v 2.7.5 --iteration $RPM_RELEASE -C "$BUILD_DIR" \
+fpm -s dir -t rpm -n python2.7 -v 2.7.6 --iteration $RPM_RELEASE -C "$BUILD_DIR" \
     -p python2.7-FULLVERSION.ARCH.rpm \
     -d bash \
     -d bzip2-libs \
@@ -36,7 +36,7 @@ fpm -s dir -t rpm -n python2.7 -v 2.7.5 --iteration $RPM_RELEASE -C "$BUILD_DIR"
     usr/local/bin usr/local/lib usr/local/share
 
 # Build python2.7-devel RPM
-fpm -s dir -t rpm -n python2.7-devel -v 2.7.5 --iteration $RPM_RELEASE -C "$BUILD_DIR" \
+fpm -s dir -t rpm -n python2.7-devel -v 2.7.6 --iteration $RPM_RELEASE -C "$BUILD_DIR" \
     -p python2.7-devel-FULLVERSION.ARCH.rpm \
     -d bash \
     -d python2.7 \
@@ -44,7 +44,7 @@ fpm -s dir -t rpm -n python2.7-devel -v 2.7.5 --iteration $RPM_RELEASE -C "$BUIL
 
 cd /vagrant
 if [[ ! -f /usr/local/bin/python2.7 ]]; then
-    sudo yum install -y python2.7-2.7.5*.rpm python2.7-devel-*.rpm
+    sudo yum install -y python2.7-2.7.6*.rpm python2.7-devel-*.rpm
 fi
 
 function download_python_package  {
