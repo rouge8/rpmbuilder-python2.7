@@ -89,3 +89,14 @@ fpm -s python -t rpm \
     -d python2.7-setuptools \
     "$BUILD_DIR/$PACKAGE"/setup.py
 sudo yum install -y python2.7-virtualenv*.rpm
+
+# IPython
+PACKAGE=ipython-1.1.0
+download_python_package $PACKAGE
+cd /vagrant
+fpm -s python -t rpm \
+    --python-bin python2.7 --python-package-name-prefix python2.7 \
+    -d python2.7 \
+    -d python2.7-devel \
+    -d python2.7-setuptools \
+    "$BUILD_DIR/$PACKAGE"/setup.py
